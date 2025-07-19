@@ -1,0 +1,255 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_address {
+  id           String   @id(map: "PK_080ebafd9159bd18d6332fe72c2") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  street       String   @db.VarChar(255)
+  number       String   @db.VarChar(50)
+  complement   String?  @db.VarChar(255)
+  neighborhood String   @db.VarChar(255)
+  city         String   @db.VarChar(255)
+  state        String   @db.VarChar(2)
+  zip_code     String   @db.VarChar(10)
+  created_at   DateTime @default(now()) @db.Timestamp(6)
+  updated_at   DateTime @default(now()) @db.Timestamp(6)
+  id_user      String?  @db.Uuid
+  tb_user      tb_user? @relation(fields: [id_user], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_7412d14978c9561012a8fb8971d")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_category {
+  id                  String                @id(map: "PK_394d39970459679271183ff2bee") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                String                @db.VarChar(255)
+  description         String?               @db.VarChar
+  status              String                @default("ATIVO") @db.VarChar
+  created_at          DateTime              @default(now()) @db.Timestamp(6)
+  updated_at          DateTime              @default(now()) @db.Timestamp(6)
+  tb_product_category tb_product_category[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_funcionality {
+  id                   String                 @id(map: "PK_901fa3c38a11910d7aa139a962a") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                 String                 @db.VarChar(255)
+  url                  String                 @db.VarChar(255)
+  is_active            Boolean                @default(true)
+  created_at           DateTime               @default(now()) @db.Timestamp(6)
+  updated_at           DateTime               @default(now()) @db.Timestamp(6)
+  tb_resource          tb_resource[]
+  tb_role_funcionality tb_role_funcionality[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_order {
+  id             String          @id(map: "PK_0ae1adc424fd20d36fe23962c8b") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  order_date     DateTime        @db.Timestamp(6)
+  total_discount Decimal         @default(0) @db.Decimal(10, 2)
+  total_price    Decimal         @default(0) @db.Decimal(10, 2)
+  payment_type   String          @default("DINHEIRO") @db.VarChar
+  status         String          @default("PENDENTE") @db.VarChar
+  created_at     DateTime        @default(now()) @db.Timestamp(6)
+  updated_at     DateTime        @default(now()) @db.Timestamp(6)
+  id_user        String          @db.Uuid
+  tb_user        tb_user         @relation(fields: [id_user], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_b239ad9f2ad8e7c5073894aa03d")
+  tb_order_item  tb_order_item[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_order_item {
+  id                  String              @id(map: "PK_c7367bf818ccde9e0ccd8113e4e") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  quantity            Int                 @default(1)
+  price               Decimal             @db.Decimal(10, 2)
+  discount            Decimal             @default(0) @db.Decimal(10, 2)
+  created_at          DateTime            @default(now()) @db.Timestamp(6)
+  updated_at          DateTime            @default(now()) @db.Timestamp(6)
+  id_order            String?             @db.Uuid
+  id_supplier_product String              @db.Uuid
+  tb_order            tb_order?           @relation(fields: [id_order], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_0dda24b18c9e7670048290dbaab")
+  tb_supplier_product tb_supplier_product @relation(fields: [id_supplier_product], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_39dfbcbe20ca5580777cef90353")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_phone {
+  id         String   @id(map: "PK_0864611f4d90c6a0a6f84c43aef") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  number     String   @db.VarChar(20)
+  type       String   @default("MOBILE") @db.VarChar
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  updated_at DateTime @default(now()) @db.Timestamp(6)
+  id_user    String?  @db.Uuid
+  tb_user    tb_user? @relation(fields: [id_user], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_e7152332e230971e68e5b9e8e2f")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_product {
+  id                        String                      @id(map: "PK_4aceb181b0d6bb92343817fc5c9") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                      String                      @unique(map: "UQ_c074ee47ca1e73637db6e97e29a") @db.VarChar(255)
+  code                      String                      @unique(map: "UQ_e3e94b6a2d703cf910d568de14b") @db.VarChar(50)
+  description               String?                     @db.VarChar(500)
+  created_at                DateTime                    @default(now()) @db.Timestamp(6)
+  updated_at                DateTime                    @default(now()) @db.Timestamp(6)
+  tb_product_category       tb_product_category[]
+  tb_supplier_order_product tb_supplier_order_product[]
+  tb_supplier_product       tb_supplier_product[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_product_category {
+  id          String      @id(map: "PK_1a06a9c1bdb2acfe768e43de328") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id_product  String      @db.Uuid
+  id_category String      @db.Uuid
+  tb_product  tb_product  @relation(fields: [id_product], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_732934e9217602cade465ba8131")
+  tb_category tb_category @relation(fields: [id_category], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_df9b0d5c1121b97ed6c2dea3f97")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_resource {
+  id              String           @id(map: "PK_de67d2fb36732119d9a9b032581") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name            String           @db.VarChar(150)
+  description     String?          @db.VarChar(255)
+  is_active       Boolean          @default(true)
+  created_at      DateTime         @default(now()) @db.Timestamp(6)
+  updated_at      DateTime         @default(now()) @db.Timestamp(6)
+  id_funcionality String?          @db.Uuid
+  tb_funcionality tb_funcionality? @relation(fields: [id_funcionality], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_0833e536f5e837d31087d20b338")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_role {
+  id                   String                 @id(map: "PK_b0ff0398cf8c3dcf30ba3b17ad4") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                 String                 @default("USER") @db.VarChar
+  is_active            Boolean                @default(true)
+  created_at           DateTime               @default(now()) @db.Timestamp(6)
+  updated_at           DateTime               @default(now()) @db.Timestamp(6)
+  tb_role_funcionality tb_role_funcionality[]
+  tb_user              tb_user[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_role_funcionality {
+  id              String          @id(map: "PK_791b3940c56cc739be60ca1b446") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  is_active       Boolean         @default(true)
+  created_at      DateTime        @default(now()) @db.Timestamp(6)
+  updated_at      DateTime        @default(now()) @db.Timestamp(6)
+  id_role         String          @db.Uuid
+  id_funcionality String          @db.Uuid
+  tb_funcionality tb_funcionality @relation(fields: [id_funcionality], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_47dadf3cfa2098d7a9e58bfd188")
+  tb_role         tb_role         @relation(fields: [id_role], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_e3e2e50a44c94df9de5e0bce0e2")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_session {
+  id         String    @id(map: "PK_f2afa15b72685221f2e9becf221") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  token      String    @db.VarChar(500)
+  is_active  Boolean   @default(true)
+  start_date DateTime  @db.Timestamp(6)
+  end_date   DateTime? @db.Timestamp(6)
+  id_user    String?   @db.Uuid
+  tb_user    tb_user?  @relation(fields: [id_user], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_00cef03530bafdc7d361b9e5d07")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_supplier {
+  id                  String                @id(map: "PK_0651141eb1579d5f991b31e64fe") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                String                @unique(map: "UQ_8ddaa0a68204371c6d61bd9ba20") @db.VarChar(255)
+  email               String?               @unique(map: "UQ_261682c3605f44901ba383ba645") @db.VarChar(255)
+  cnpj                String                @unique(map: "UQ_bfd673d2f595bfe65a7444833f6") @db.VarChar(14)
+  phone               String?               @db.VarChar(50)
+  address             String?               @db.VarChar(500)
+  status              String                @default("ATIVO") @db.VarChar
+  created_at          DateTime              @default(now()) @db.Timestamp(6)
+  updated_at          DateTime              @default(now()) @db.Timestamp(6)
+  tb_supplier_order   tb_supplier_order[]
+  tb_supplier_product tb_supplier_product[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_supplier_order {
+  id                        String                                 @id(map: "PK_e9156bac8fb59c52f994e54c559") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  description               String?                                @db.VarChar
+  payment_status            tb_supplier_order_payment_status_enum  @default(Pendente)
+  delivery_status           tb_supplier_order_delivery_status_enum @default(Aguardando_Envio)
+  order_date                DateTime                               @default(now()) @db.Timestamp(6)
+  expected_delivery_date    DateTime?                              @db.Timestamp(6)
+  total_amount              Decimal?                               @db.Decimal(10, 2)
+  created_at                DateTime                               @default(now()) @db.Timestamp(6)
+  updated_at                DateTime                               @default(now()) @db.Timestamp(6)
+  id_supplier               String?                                @db.Uuid
+  sequencial_code           Int
+  tb_supplier               tb_supplier?                           @relation(fields: [id_supplier], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_1c4dee2446d7feb4a4e62ab0eaf")
+  tb_supplier_order_product tb_supplier_order_product[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_supplier_order_product {
+  id                String             @id(map: "PK_e74ed99c7f280f0ff9712ddd9ef") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  quantity          Int
+  unit_price        Decimal            @db.Decimal(10, 2)
+  created_at        DateTime           @default(now()) @db.Timestamp(6)
+  updated_at        DateTime           @default(now()) @db.Timestamp(6)
+  id_supplier_order String?            @db.Uuid
+  id_product        String?            @db.Uuid
+  tb_supplier_order tb_supplier_order? @relation(fields: [id_supplier_order], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_0aa3827bad17f90588a8cb15881")
+  tb_product        tb_product?        @relation(fields: [id_product], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_713619b9dc00045d990ff068679")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_supplier_product {
+  id            String          @id(map: "PK_410be21707607452a378bb720ec") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  price         Decimal         @db.Decimal(10, 2)
+  quantity      Int             @default(0)
+  created_at    DateTime        @default(now()) @db.Timestamp(6)
+  updated_at    DateTime        @default(now()) @db.Timestamp(6)
+  id_supplier   String?         @db.Uuid
+  id__product   String?         @map("id _product") @db.Uuid
+  tb_order_item tb_order_item[]
+  tb_product    tb_product?     @relation(fields: [id__product], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_80fe3e5605167d650da7658a988")
+  tb_supplier   tb_supplier?    @relation(fields: [id_supplier], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_cb835ec20aed83960c51c0b1739")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model tb_user {
+  id         String       @id(map: "PK_1943338f8f00e074a3c5bb48d5e") @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name       String       @db.VarChar(255)
+  email      String       @db.VarChar(255)
+  cpf        String       @db.VarChar(14)
+  password   String       @db.VarChar(255)
+  is_active  Boolean      @default(true)
+  provider   String       @default("LOCAL") @db.VarChar
+  birth_date DateTime?    @db.Date
+  created_at DateTime     @default(now()) @db.Timestamp(6)
+  updated_at DateTime     @default(now()) @db.Timestamp(6)
+  deleted_at DateTime?    @db.Timestamp(6)
+  id_role    String?      @db.Uuid
+  tb_address tb_address[]
+  tb_order   tb_order[]
+  tb_phone   tb_phone[]
+  tb_session tb_session[]
+  tb_role    tb_role?     @relation(fields: [id_role], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_b53b02e9a19d2146af36d8cb86c")
+}
+
+enum tb_supplier_order_delivery_status_enum {
+  Pendente
+  Aguardando_Envio      @map("Aguardando Envio")
+  Enviado
+  Em_Tr_nsito           @map("Em Trânsito")
+  Entregue
+  Entregue_Parcialmente @map("Entregue Parcialmente")
+  Falha_na_Entrega      @map("Falha na Entrega")
+  Devolvido
+}
+
+enum tb_supplier_order_payment_status_enum {
+  Pendente
+  Pago
+  Parcialmente_Pago @map("Parcialmente Pago")
+  Reembolsado
+  Falhou
+}
